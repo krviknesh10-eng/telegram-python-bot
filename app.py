@@ -1,10 +1,9 @@
 import os
+import requests
 from flask import Flask, request
-import telebot
 
 app = Flask(__name__)
 
-# Get Telegram Bot Token from Render Environment Variable
 TOKEN = os.environ.get("BOT_TOKEN")
 
 print("=================================")
@@ -12,56 +11,29 @@ print("Telegram Bot Starting...")
 print("TOKEN LOADED:", bool(TOKEN))
 print("=================================")
 
-if not TOKEN:
-    raise ValueError("BOT_TOKEN environment variable is missing!")
 
-bot = telebot.TeleBot(TOKEN)
+def send_message(chat_id, text):
 
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
 
-# /start command
-@bot.message_handler(commands=["start"])
-def start(message):
-    print("START command received")
-    print("Chat ID:", message.chat.id)
+    data = {
+        "chat_id": chat_id,
+        "text": text
+    }
 
-    bot.send_message(
-        message.chat.id,
-        "Hello 👋\nWelcome to my Telegram bot!"
-    )
+    response = requests.post(url, json=data)
 
+    print("Telegram API Status:", response.status_code)
+    print("Telegram API Response:", response.text)
 
-# /help command
-@bot.message_handler(commands=["help"])
-def help_command(message):
-    print("HELP command received")
-
-    bot.send_message(
-        message.chat.id,
-        "Available commands:\n\n"
-        "/start - Start the bot\n"
-        "/help - Show help"
-    )
+    return response
 
 
-# Handle normal messages
-@bot.message_handler(func=lambda message: True)
-def handle_message(message):
-    print("Message received:", message.text)
-    print("Chat ID:", message.chat.id)
-
-    bot.send_message(
-        message.chat.id,
-        "You said: " + str(message.text)
-    )
-
-
-# Home page
 @app.route("/", methods=["GET"])
 def home():
     return "Telegram Bot is running!", 200
 
 
-# Telegram webhook
 @app.route("/webhook", methods=["POST"])
 def webhook():
 
@@ -70,33 +42,69 @@ def webhook():
     print("=================================")
 
     try:
+
         data = request.get_json()
 
         print("Telegram Data:")
         print(data)
 
         if not data:
-            print("No JSON data received")
             return "No data", 400
 
-        update = telebot.types.Update.de_json(data)
+        message = data.get("message")
 
-        bot.process_new_updates([update])
+        if not message:
+            print("No message found")
+            return "OK", 200
 
-        print("Update processed successfully")
+        chat = message.get("chat")
+        chat_id = chat.get("id")
+
+        text = message.get("text", "")
+
+        print("Chat ID:", chat_id)
+        print("Message:", text)
+
+        # /start
+        if text == "/start":
+
+            print("START command received")
+
+            send_message(
+                chat_id,
+                "Hello 👋\nWelcome to my Telegram bot!"
+            )
+
+        # /help
+        elif text == "/help":
+
+            send_message(
+                chat_id,
+                "Available commands:\n\n"
+                "/start - Start the bot\n"
+                "/help - Show help"
+            )
+
+        # Normal message
+        else:
+
+            send_message(
+                chat_id,
+                "You said: " + text
+            )
 
         return "OK", 200
 
     except Exception as e:
+
         print("ERROR:", str(e))
+
         return "Error", 500
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
 
-    print("Starting Flask server...")
-    print("Port:", port)
+    port = int(os.environ.get("PORT", 10000))
 
     app.run(
         host="0.0.0.0",
