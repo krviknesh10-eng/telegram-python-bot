@@ -1,10 +1,12 @@
 import os
 import requests
 from flask import Flask, request
+from openai import OpenAI
 
 app = Flask(__name__)
 
 TOKEN = os.environ.get("BOT_TOKEN")
+API_KEY = os.environ.get("OPEN_AI_API_KEY")
 
 print("=================================")
 print("Telegram Bot Starting...")
@@ -72,7 +74,7 @@ def webhook():
 
             send_message(
                 chat_id,
-                "Hello 👋\nWelcome to my Telegram bot!"
+                "👋 Hello and welcome to the Black Pearl Bot! 🏴‍☠️\n\n⚫ Powered by Black Pearl\n💬 Type /help to see all available commands.\n\n© Black Pearl — All Rights Reserved."
             )
 
         # /help
@@ -82,8 +84,30 @@ def webhook():
                 chat_id,
                 "Available commands:\n\n"
                 "/start - Start the bot\n"
-                "/help - Show help"
+                "/help - Show help\n"
+                "/openai YOUR_MESSAGE - chat with AI eg : /openai hello , /openai hi \n "
+                "/"
             )
+
+        # AI chat
+        elif text.startswith("/openai"):
+            message = text[len("/openai"):].strip()
+            client = OpenAI(
+                api_key=API_KEY,
+                base_url="https://api.groq.com/openai/v1"
+            )
+
+            MODEL = "llama-3.3-70b-versatile"
+            response = client.responses.create(
+                model=MODEL,
+                input=message
+            )
+    
+            send_message(
+                chat_id,
+                response.output_text
+            )
+        
 
         # Normal message
         else:
