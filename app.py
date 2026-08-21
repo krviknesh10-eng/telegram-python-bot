@@ -115,7 +115,7 @@ def webhook():
             message = text[len("/movie"):].strip()
             send_message(
                 chat_id,
-                search_movies("karuppu")
+                search_movies(message)
             )
 
         # Normal message
