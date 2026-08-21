@@ -2,6 +2,8 @@ import os
 import requests
 from flask import Flask, request
 from openai import OpenAI
+from moviescrapping import search_movies
+
 
 app = Flask(__name__)
 
@@ -86,7 +88,7 @@ def webhook():
                 "/start - Start the bot\n"
                 "/help - Show help\n"
                 "/openai YOUR_MESSAGE - chat with AI eg : /openai hello , /openai hi \n "
-                "/"
+                "/movie MOVIE_NAME - send you a movie link (only 2026 released movies eg : /movie karuppu) \n"
             )
 
         # AI chat
@@ -107,7 +109,13 @@ def webhook():
                 chat_id,
                 response.output_text
             )
-        
+
+        elif text.startswith("/movie"):
+            message = text[len("/movie"):].strip()
+            send_message(
+                chat_id,
+                search_movies("karuppu")
+            )
 
         # Normal message
         else:
