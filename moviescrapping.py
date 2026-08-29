@@ -198,7 +198,7 @@ HEADERS = {
 }
 
 #FUZZY_CUTOFF = 0.95  # lower = more lenient matching
-FUZZY_CUTOFF = os.environ.get("FUZZY_CUTOFF")
+FUZZY_CUTOFF = float(os.environ.get("FUZZY_CUTOFF", 0.35))
 
 # ==========================================================
 # SOUP HELPER
