@@ -113,10 +113,18 @@ def webhook():
 
         elif text.startswith("/movie"):
             message = text[len("/movie"):].strip()
-            send_message(
-                chat_id,
-                main(message)
-            )
+            min_length = int(os.environ.get("MIN_MOVIE_NAME_LENGTH", 3))
+
+            if len(message) > min_length:
+                send_message(
+                    chat_id,
+                    main(message)
+                )
+            else:
+                send_message(
+                    chat_id,
+                    f"⚠️ Movie name must be greater than {min_length} characters"
+                )
 
         # Normal message
         else:
