@@ -197,7 +197,7 @@ HEADERS = {
     "User-Agent": "Mozilla/5.0"
 }
 
-FUZZY_CUTOFF = 0.35  # lower = more lenient matching
+FUZZY_CUTOFF = 0.95  # lower = more lenient matching
 
 
 # ==========================================================
