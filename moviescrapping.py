@@ -176,7 +176,7 @@ Flow:
  6. Scrape that movie/class in full (seasons + 360/720/1080 file links).
  7. Print everything as plain text.
 """
-
+import os
 import sys
 import difflib
 import requests
