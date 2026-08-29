@@ -2,7 +2,7 @@ import os
 import requests
 from flask import Flask, request
 from openai import OpenAI
-from moviescrapping import search_movies
+from moviescrapping import main
 
 
 app = Flask(__name__)
